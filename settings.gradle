@@ -1,5 +1,1 @@
-include ':record'
-
-
-
-include 'Camera2VideoSample'
+include ':Camera2VideoSample'

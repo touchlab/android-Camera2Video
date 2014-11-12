@@ -5,15 +5,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.hardware.display.DisplayManager;
-import android.hardware.display.VirtualDisplay;
-import android.media.MediaRecorder;
-import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Surface;
@@ -22,9 +16,6 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.android.camera2video.R;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by kgalligan on 11/12/14.
@@ -44,7 +35,6 @@ public class RecordTest extends Activity
     private static final String TAG = "MediaProjectionDemo";
     private static final int PERMISSION_CODE = 1;
     private MediaProjectionManager mProjectionManager;
-    private MediaProjection mMediaProjection;
 
     private RecordService mService;
     private ServiceConnection mConnection = new ServiceConnection()
@@ -86,16 +76,6 @@ public class RecordTest extends Activity
         bindService(new Intent(this, RecordService.class), mConnection, Context.BIND_AUTO_CREATE);
     }
 
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        if (mMediaProjection != null)
-        {
-            mMediaProjection.stop();
-            mMediaProjection = null;
-        }
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -112,7 +92,8 @@ public class RecordTest extends Activity
             return;
         }
 
-        mService.startRecording(this, resultCode, data);
+        mService.initProjection(resultCode, data);
+        mService.startRecording(this);
     }
 
     public void onToggleScreenShare()
@@ -129,29 +110,18 @@ public class RecordTest extends Activity
 
     private void shareScreen()
     {
-        //TODO: Need to be able to restart
-        /*if (mMediaProjection == null)
+        if (mService.isProjectionReady())
+        {
+            mService.startRecording(this);
+        }
+        else
         {
             startActivityForResult(mProjectionManager.createScreenCaptureIntent(), PERMISSION_CODE);
-            return;
-        }*/
-
-//        mVirtualDisplay = createVirtualDisplay();
-
-        startActivityForResult(mProjectionManager.createScreenCaptureIntent(), PERMISSION_CODE);
+        }
     }
 
     private void stopScreenSharing()
     {
         mService.stopRecording(this);
     }
-
-    /*private void resizeVirtualDisplay()
-    {
-        if (mVirtualDisplay == null)
-        {
-            return;
-        }
-        mVirtualDisplay.resize(mDisplayWidth, mDisplayHeight, mScreenDensity);
-    }*/
 }

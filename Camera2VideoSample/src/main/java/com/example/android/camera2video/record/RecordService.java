@@ -18,9 +18,12 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.Surface;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+
+import co.touchlab.android.threading.utils.UiThreadContext;
 
 public class RecordService extends Service
 {
@@ -61,6 +64,11 @@ public class RecordService extends Service
         return recordingVideo;
     }
 
+    public boolean isProjectionReady()
+    {
+        return mMediaProjection != null;
+    }
+
     @Override
     public void onCreate()
     {
@@ -74,39 +82,47 @@ public class RecordService extends Service
         return START_STICKY;
     }
 
-    public void startRecording(Activity activity, int resultCode, Intent data)
+    public void initProjection(int resultCode, Intent data)
     {
+        UiThreadContext.assertUiThread();
+
+        mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
+    }
+
+    public void startRecording(Activity activity)
+    {
+        UiThreadContext.assertUiThread();
+
         DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenDensity = metrics.densityDpi;
         mDisplayWidth = metrics.widthPixels/2;
         mDisplayHeight = metrics.heightPixels/2;
 
-        mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
         mVirtualDisplay = createVirtualDisplay();
+
     }
 
     public void stopRecording(Activity host)
     {
+        UiThreadContext.assertUiThread();
+
         recordingVideo = false;
         // Stop recording
         mMediaRecorder.stop();
         mMediaRecorder.release();
         mMediaRecorder = null;
 
-        if (mVirtualDisplay == null)
+        if (mVirtualDisplay != null)
         {
-            return;
+            mVirtualDisplay.release();
+            mVirtualDisplay = null;
         }
-        mVirtualDisplay.release();
 
-        /*Intent shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(videoFile));
-        shareIntent.setType("video/mp4");
-        host.startActivity(Intent.createChooser(shareIntent, "Share"));*/
-
-        shareVideo(host, videoFile);
+        if(videoFile != null && videoFile.length() > 0)
+            shareVideo(host, videoFile);
+        else
+            Toast.makeText(host, "Looks like you had trouble, kid", Toast.LENGTH_LONG).show();
 
         videoFile = null;
     }
@@ -131,7 +147,7 @@ public class RecordService extends Service
     private VirtualDisplay createVirtualDisplay()
     {
         mMediaRecorder = new MediaRecorder();
-        videoFile = new File(Environment.getExternalStorageDirectory(), "screenvid_" + System.currentTimeMillis() + ".mp4");
+        videoFile = new File(makeBaseDir(), "screenvid_" + System.currentTimeMillis() + ".mp4");
 
         try
         {
@@ -170,5 +186,13 @@ public class RecordService extends Service
             e.printStackTrace();
         }
         return null;
+    }
+
+    private File makeBaseDir()
+    {
+        File root = new File(Environment.getExternalStorageDirectory(), "touchlabiscool");
+        root.mkdirs();
+
+        return root;
     }
 }

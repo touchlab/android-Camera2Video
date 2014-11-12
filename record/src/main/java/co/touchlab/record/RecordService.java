@@ -31,8 +31,6 @@ public class RecordService extends Service
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-
-
     public boolean toggleVideo()
     {
         if (isRecording()) {
