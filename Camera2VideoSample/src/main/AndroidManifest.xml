@@ -36,21 +36,21 @@
         android:theme="@style/MaterialTheme" >
 
         <activity
-            android:name=".CameraActivity"
+            android:name="co.touchlab.lollipop.video.CameraActivity"
             android:label="@string/app_name"/>
 
         <activity
-            android:name=".record.RecordTest"
+            android:name="co.touchlab.lollipop.video.record.RecordTest"
             android:label="Record Test"/>
 
         <service
-            android:name=".record.RecordService"
+            android:name="co.touchlab.lollipop.video.record.RecordService"
             android:enabled="true"
             android:exported="true" >
         </service>
 
         <activity
-            android:name=".DispatchActivity"
+            android:name="co.touchlab.lollipop.video.DispatchActivity"
             android:label="@string/title_activity_dispatch" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

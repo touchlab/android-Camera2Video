@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.camera2video;
+package co.touchlab.lollipop.video;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -51,7 +51,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.android.camera2video.utils.Filez;
+import com.example.android.camera2video.R;
+
+import co.touchlab.lollipop.video.utils.Filez;
 
 import java.io.File;
 import java.io.IOException;

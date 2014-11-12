@@ -1,4 +1,4 @@
-package com.example.android.camera2video.utils;
+package co.touchlab.lollipop.video.utils;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;

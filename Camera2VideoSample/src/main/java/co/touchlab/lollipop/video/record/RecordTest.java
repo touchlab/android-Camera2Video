@@ -1,4 +1,4 @@
-package com.example.android.camera2video.record;
+package co.touchlab.lollipop.video.record;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -9,8 +9,6 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.util.SparseIntArray;
-import android.view.Surface;
 import android.view.View;
 import android.widget.Toast;
 import android.widget.ToggleButton;

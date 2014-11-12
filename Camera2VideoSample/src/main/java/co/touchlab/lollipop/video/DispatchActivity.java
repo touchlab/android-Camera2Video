@@ -1,13 +1,11 @@
-package com.example.android.camera2video;
+package co.touchlab.lollipop.video;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.example.android.camera2video.R;
-import com.example.android.camera2video.record.RecordTest;
+import co.touchlab.lollipop.video.record.RecordTest;
 
 public class DispatchActivity extends Activity {
 

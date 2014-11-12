@@ -4,7 +4,8 @@ Android Camera2Video Sample
 Introduction
 ------------
 
-This sample demonstrates how to record video using Camera2 API.
+I originally took this from the Android camera2 sample, but it was kind of a mess, then I added
+some things.
 
 Pre-requisites
 --------------
@@ -16,20 +17,15 @@ Pre-requisites
 Getting Started
 ---------------
 
-This sample uses the Gradle build system. To build this project, use the
-"gradlew build" command or use "Import Project" in Android Studio.
+You should use Android Studio.  If you're not sure what to do, you're really not
+ready for this.
 
-Support
--------
+Features
+________
 
-- Google+ Community: https://plus.google.com/communities/105153134372062985968
-- Stack Overflow: http://stackoverflow.com/questions/tagged/android
+CameraActivity lets you use MediaRecorder to Surface for video recording.
 
-If you've found an error in this sample, please file an issue:
-https://github.com/googlesamples/android-Camera2Video
-
-Patches are encouraged, and may be submitted by forking this project and
-submitting a pull request through GitHub. Please see CONTRIBUTING.md for more details.
+'record' package lets you record the screen.
 
 License
 -------

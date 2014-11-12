@@ -1,9 +1,7 @@
-package com.example.android.camera2video.record;
+package co.touchlab.lollipop.video.record;
 
 import android.app.Activity;
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -13,14 +11,12 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.Surface;
 import android.widget.Toast;
 
-import com.example.android.camera2video.utils.Filez;
+import co.touchlab.lollipop.video.utils.Filez;
 
 import java.io.File;
 import java.io.IOException;

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.example.android.camera2video;
+package co.touchlab.lollipop.video;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.example.android.camera2video.R;
 
 public class CameraActivity extends Activity {
 
