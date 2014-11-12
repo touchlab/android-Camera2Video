@@ -37,16 +37,22 @@
         <activity
             android:name=".CameraActivity"
             android:label="@string/app_name" >
-
         </activity>
         <activity
             android:name=".record.RecordTest"
             android:label="Record Test" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".record.RecordService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>
