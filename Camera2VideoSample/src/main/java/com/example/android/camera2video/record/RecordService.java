@@ -20,6 +20,8 @@ import android.util.DisplayMetrics;
 import android.view.Surface;
 import android.widget.Toast;
 
+import com.example.android.camera2video.utils.Filez;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -131,14 +133,7 @@ public class RecordService extends Service
 
     private void shareVideo(File videoFile)
     {
-        ContentValues content = new ContentValues(4);
-        content.put(MediaStore.Video.VideoColumns.TITLE, videoFile.getName());
-        content.put(MediaStore.Video.VideoColumns.DATE_ADDED, System.currentTimeMillis() / 1000);
-        content.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
-        content.put(MediaStore.Video.Media.DATA, videoFile.getPath());
-        ContentResolver resolver = getContentResolver();
-        Uri uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, content);
-
+        Uri uri = Filez.storeFile(this, videoFile);
         EventBusExt.getDefault().post(new RecordedVideo(uri));
     }
 
@@ -155,7 +150,7 @@ public class RecordService extends Service
     private VirtualDisplay createVirtualDisplay()
     {
         mMediaRecorder = new MediaRecorder();
-        videoFile = new File(makeBaseDir(), "screenvid_" + System.currentTimeMillis() + ".mp4");
+        videoFile = new File(Filez.makeBaseDir(), "screenvid_" + System.currentTimeMillis() + ".mp4");
 
         try
         {
@@ -196,11 +191,5 @@ public class RecordService extends Service
         return null;
     }
 
-    private File makeBaseDir()
-    {
-        File root = new File(Environment.getExternalStorageDirectory(), "touchlabiscool");
-        root.mkdirs();
 
-        return root;
-    }
 }

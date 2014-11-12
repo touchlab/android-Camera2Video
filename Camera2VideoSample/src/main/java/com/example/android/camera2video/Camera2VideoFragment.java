@@ -23,6 +23,7 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -36,6 +37,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -48,6 +50,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.example.android.camera2video.utils.Filez;
 
 import java.io.File;
 import java.io.IOException;
@@ -177,6 +181,7 @@ public class Camera2VideoFragment extends Fragment implements View.OnClickListen
         }
 
     };
+    private File videoFile;
 
     public static Camera2VideoFragment newInstance() {
         Camera2VideoFragment fragment = new Camera2VideoFragment();
@@ -367,7 +372,7 @@ public class Camera2VideoFragment extends Fragment implements View.OnClickListen
             return;
         }
         mMediaRecorder = new MediaRecorder();
-        final File file = getVideoFile(activity);
+        videoFile = createVideoFile();
         try {
             // UI
             mButtonVideo.setText(R.string.stop);
@@ -376,7 +381,7 @@ public class Camera2VideoFragment extends Fragment implements View.OnClickListen
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mMediaRecorder.setOutputFile(file.getAbsolutePath());
+            mMediaRecorder.setOutputFile(videoFile.getAbsolutePath());
             mMediaRecorder.setVideoEncodingBitRate(10000000);
             mMediaRecorder.setVideoFrameRate(30);
             mMediaRecorder.setVideoSize(1280, 720);
@@ -421,8 +426,8 @@ public class Camera2VideoFragment extends Fragment implements View.OnClickListen
         }
     }
 
-    private File getVideoFile(Context context) {
-        return new File(context.getExternalFilesDir(null), "video.mp4");
+    private File createVideoFile() {
+        return new File(Filez.makeBaseDir(), "cameravid_"+ System.currentTimeMillis() +".mp4");
     }
 
     private void stopRecordingVideo() {
@@ -433,12 +438,16 @@ public class Camera2VideoFragment extends Fragment implements View.OnClickListen
         mMediaRecorder.stop();
         mMediaRecorder.release();
         mMediaRecorder = null;
-        Activity activity = getActivity();
-        if (null != activity) {
-            Toast.makeText(activity, "Video saved: " + getVideoFile(activity),
-                    Toast.LENGTH_SHORT).show();
-        }
+
         startPreview();
+
+        Uri uri = Filez.storeFile(getActivity(), videoFile);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("video/*");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        startActivity(Intent.createChooser(intent, "Share using"));
+
+        videoFile = null;
     }
 
     public static class ErrorDialog extends DialogFragment {
