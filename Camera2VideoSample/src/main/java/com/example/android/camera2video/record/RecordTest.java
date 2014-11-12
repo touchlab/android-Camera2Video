@@ -54,6 +54,8 @@ public class RecordTest extends Activity
         {
             RecordService.LocalBinder binder = (RecordService.LocalBinder) service;
             mService = binder.getService();
+            toggleButton.setChecked(mService.isRecordingVideo());
+            toggleButton.setEnabled(true);
         }
 
         @Override
@@ -62,6 +64,7 @@ public class RecordTest extends Activity
             mService = null;
         }
     };
+    private ToggleButton toggleButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -69,6 +72,15 @@ public class RecordTest extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record_test);
 
+        toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
+        toggleButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                onToggleScreenShare();
+            }
+        });
         mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
         bindService(new Intent(this, RecordService.class), mConnection, Context.BIND_AUTO_CREATE);
@@ -103,9 +115,9 @@ public class RecordTest extends Activity
         mService.startRecording(this, resultCode, data);
     }
 
-    public void onToggleScreenShare(View view)
+    public void onToggleScreenShare()
     {
-        if (((ToggleButton) view).isChecked())
+        if (toggleButton.isChecked())
         {
             shareScreen();
         }
@@ -131,7 +143,7 @@ public class RecordTest extends Activity
 
     private void stopScreenSharing()
     {
-        mService.stopRecording();
+        mService.stopRecording(this);
     }
 
     /*private void resizeVirtualDisplay()

@@ -2,6 +2,8 @@ package com.example.android.camera2video.record;
 
 import android.app.Activity;
 import android.app.Service;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -9,9 +11,11 @@ import android.hardware.display.VirtualDisplay;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.Surface;
 
@@ -32,9 +36,10 @@ public class RecordService extends Service
     private VirtualDisplay mVirtualDisplay;
     private MediaRecorder mMediaRecorder;
 
-    private boolean mIsRecordingVideo;
+    private boolean recordingVideo;
 
     private final IBinder mBinder = new LocalBinder();
+    private File videoFile;
 
     public class LocalBinder extends Binder
     {
@@ -51,6 +56,11 @@ public class RecordService extends Service
         return mBinder;
     }
 
+    public boolean isRecordingVideo()
+    {
+        return recordingVideo;
+    }
+
     @Override
     public void onCreate()
     {
@@ -58,21 +68,27 @@ public class RecordService extends Service
         mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
+        return START_STICKY;
+    }
+
     public void startRecording(Activity activity, int resultCode, Intent data)
     {
         DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenDensity = metrics.densityDpi;
-        mDisplayWidth = metrics.widthPixels;
-        mDisplayHeight = metrics.heightPixels;
+        mDisplayWidth = metrics.widthPixels/2;
+        mDisplayHeight = metrics.heightPixels/2;
 
         mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
         mVirtualDisplay = createVirtualDisplay();
     }
 
-    public void stopRecording()
+    public void stopRecording(Activity host)
     {
-        mIsRecordingVideo = false;
+        recordingVideo = false;
         // Stop recording
         mMediaRecorder.stop();
         mMediaRecorder.release();
@@ -83,25 +99,52 @@ public class RecordService extends Service
             return;
         }
         mVirtualDisplay.release();
+
+        /*Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(videoFile));
+        shareIntent.setType("video/mp4");
+        host.startActivity(Intent.createChooser(shareIntent, "Share"));*/
+
+        shareVideo(host, videoFile);
+
+        videoFile = null;
+    }
+
+    private void shareVideo(Activity activity, File videoFile)
+    {
+        ContentValues content = new ContentValues(4);
+        content.put(MediaStore.Video.VideoColumns.TITLE, videoFile.getName());
+        content.put(MediaStore.Video.VideoColumns.DATE_ADDED, System.currentTimeMillis() / 1000);
+        content.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+        content.put(MediaStore.Video.Media.DATA, videoFile.getPath());
+        ContentResolver resolver = getContentResolver();
+        Uri uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                content);
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("video/*");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        activity.startActivity(Intent.createChooser(intent, "Share using"));
     }
 
     private VirtualDisplay createVirtualDisplay()
     {
         mMediaRecorder = new MediaRecorder();
-        final File file = new File(Environment.getExternalStorageDirectory(), "screenvid_" + System.currentTimeMillis() + ".mp4");
+        videoFile = new File(Environment.getExternalStorageDirectory(), "screenvid_" + System.currentTimeMillis() + ".mp4");
 
         try
         {
             // UI
-            mIsRecordingVideo = true;
+            recordingVideo = true;
             // Configure the MediaRecorder
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mMediaRecorder.setOutputFile(file.getAbsolutePath());
+            mMediaRecorder.setOutputFile(videoFile.getAbsolutePath());
             mMediaRecorder.setVideoEncodingBitRate(BIT_RATE);
             mMediaRecorder.setVideoFrameRate(FRAME_RATE);
-            mMediaRecorder.setVideoSize(1280, 720);
+            mMediaRecorder.setVideoSize(mDisplayWidth, mDisplayHeight);
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 //            int rotation = getWindowManager().getDefaultDisplay().getRotation();
