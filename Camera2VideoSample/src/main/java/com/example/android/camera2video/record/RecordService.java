@@ -23,6 +23,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 
+import co.touchlab.android.threading.eventbus.EventBusExt;
 import co.touchlab.android.threading.utils.UiThreadContext;
 
 public class RecordService extends Service
@@ -103,7 +104,7 @@ public class RecordService extends Service
 
     }
 
-    public void stopRecording(Activity host)
+    public void stopRecording()
     {
         UiThreadContext.assertUiThread();
 
@@ -120,14 +121,15 @@ public class RecordService extends Service
         }
 
         if(videoFile != null && videoFile.length() > 0)
-            shareVideo(host, videoFile);
+            shareVideo(videoFile);
         else
-            Toast.makeText(host, "Looks like you had trouble, kid", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Looks like you had trouble, kid", Toast.LENGTH_LONG).show();
 
         videoFile = null;
+        stopSelf();
     }
 
-    private void shareVideo(Activity activity, File videoFile)
+    private void shareVideo(File videoFile)
     {
         ContentValues content = new ContentValues(4);
         content.put(MediaStore.Video.VideoColumns.TITLE, videoFile.getName());
@@ -135,13 +137,19 @@ public class RecordService extends Service
         content.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
         content.put(MediaStore.Video.Media.DATA, videoFile.getPath());
         ContentResolver resolver = getContentResolver();
-        Uri uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                content);
+        Uri uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, content);
 
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("video/*");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        activity.startActivity(Intent.createChooser(intent, "Share using"));
+        EventBusExt.getDefault().post(new RecordedVideo(uri));
+    }
+
+    public static class RecordedVideo
+    {
+        public final Uri uri;
+
+        public RecordedVideo(Uri uri)
+        {
+            this.uri = uri;
+        }
     }
 
     private VirtualDisplay createVirtualDisplay()

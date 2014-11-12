@@ -17,6 +17,8 @@ import android.widget.ToggleButton;
 
 import com.example.android.camera2video.R;
 
+import co.touchlab.android.threading.eventbus.EventBusExt;
+
 /**
  * Created by kgalligan on 11/12/14.
  */
@@ -74,8 +76,28 @@ public class RecordTest extends Activity
         mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
         bindService(new Intent(this, RecordService.class), mConnection, Context.BIND_AUTO_CREATE);
+
+        EventBusExt.getDefault().register(this);
     }
 
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+
+        unbindService(mConnection);
+
+        EventBusExt.getDefault().unregister(this);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void onEventMainThread(RecordService.RecordedVideo video)
+    {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("video/*");
+        intent.putExtra(Intent.EXTRA_STREAM, video.uri);
+        startActivity(Intent.createChooser(intent, "Share using"));
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -91,6 +113,9 @@ public class RecordTest extends Activity
             Toast.makeText(this, "User denied screen sharing permission", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        //Make it sticky
+        startService(new Intent(this, RecordService.class));
 
         mService.initProjection(resultCode, data);
         mService.startRecording(this);
@@ -122,6 +147,6 @@ public class RecordTest extends Activity
 
     private void stopScreenSharing()
     {
-        mService.stopRecording(this);
+        mService.stopRecording();
     }
 }
