@@ -17,9 +17,17 @@
 package com.example.android.camera2video;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 public class CameraActivity extends Activity {
+
+    public static void callMe(Activity a)
+    {
+        Intent i = new Intent(a, CameraActivity.class);
+        a.startActivity(i);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

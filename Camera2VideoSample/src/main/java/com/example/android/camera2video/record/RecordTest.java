@@ -24,17 +24,13 @@ import co.touchlab.android.threading.eventbus.EventBusExt;
  */
 public class RecordTest extends Activity
 {
-    private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
-
-    static
+    public static void callMe(Activity a)
     {
-        ORIENTATIONS.append(Surface.ROTATION_0, 90);
-        ORIENTATIONS.append(Surface.ROTATION_90, 0);
-        ORIENTATIONS.append(Surface.ROTATION_180, 270);
-        ORIENTATIONS.append(Surface.ROTATION_270, 180);
+        Intent i = new Intent(a, RecordTest.class);
+        a.startActivity(i);
     }
 
-    private static final String TAG = "MediaProjectionDemo";
+    private static final String TAG = "RecordTest";
     private static final int PERMISSION_CODE = 1;
     private MediaProjectionManager mProjectionManager;
 
