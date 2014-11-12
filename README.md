@@ -21,7 +21,7 @@ You should use Android Studio.  If you're not sure what to do, you're really not
 ready for this.
 
 Features
-________
+--------
 
 CameraActivity lets you use MediaRecorder to Surface for video recording.
 
