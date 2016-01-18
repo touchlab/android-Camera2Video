@@ -6,4 +6,5 @@ build
 .idea
 app.iml
 *.iml
-
+release.jks
+release_password.txt

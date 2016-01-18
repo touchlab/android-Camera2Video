@@ -14,14 +14,7 @@ public class DispatchActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dispatch);
 
-        findViewById(R.id.cameraButton).setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                CameraActivity.callMe(DispatchActivity.this);
-            }
-        });
+
 
         findViewById(R.id.screenButton).setOnClickListener(new View.OnClickListener()
         {
