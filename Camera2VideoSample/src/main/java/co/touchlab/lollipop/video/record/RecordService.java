@@ -26,22 +26,26 @@ import co.touchlab.android.threading.utils.UiThreadContext;
 
 public class RecordService extends Service
 {
-    public static final int BIT_RATE = 2000000;
-    public static final int FRAME_RATE = 30;
+    public static final int    BIT_RATE               = 2000000;
+    public static final int    FRAME_RATE             = 30;
+    public static final String REPLY_BROADCAST_TARGET = "REPLY_BROADCAST_TARGET";
 
     private int mScreenDensity;
     private int mDisplayWidth;
     private int mDisplayHeight;
 
     private MediaProjectionManager mProjectionManager;
-    private MediaProjection mMediaProjection;
-    private VirtualDisplay mVirtualDisplay;
-    private MediaRecorder mMediaRecorder;
+    private MediaProjection        mMediaProjection;
+    private VirtualDisplay         mVirtualDisplay;
+    private MediaRecorder          mMediaRecorder;
 
     private boolean recordingVideo;
 
     private final IBinder mBinder = new LocalBinder();
-    private File videoFile;
+    private File   videoFile;
+    private String replyBroadcastTarget;
+    private String shareTarget;
+    private String shareSubject;
 
     public class LocalBinder extends Binder
     {
@@ -72,12 +76,34 @@ public class RecordService extends Service
     public void onCreate()
     {
         super.onCreate();
-        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        mProjectionManager = (MediaProjectionManager) getSystemService(
+                Context.MEDIA_PROJECTION_SERVICE);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+        if(isRecordingVideo())
+        {
+            //We're busy
+        }
+        else
+        {
+            if(intent.hasExtra(REPLY_BROADCAST_TARGET))
+            {
+                //If this, we'll end with a broadcast
+                replyBroadcastTarget = intent.getStringExtra(REPLY_BROADCAST_TARGET);
+            }
+            else
+            {
+                //If this, we'll share directly
+                shareTarget = intent.getStringExtra("SHARE_TARGET");
+                shareSubject = intent.getStringExtra("SHARE_SUBJECT");
+            }
+
+            startRecording();
+        }
+
         return START_STICKY;
     }
 
@@ -88,12 +114,13 @@ public class RecordService extends Service
         mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
     }
 
-    public void startRecording(Activity activity)
+    public void startRecording()
     {
         UiThreadContext.assertUiThread();
 
-        DisplayMetrics metrics = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+        recordingVideo = true;
         mScreenDensity = metrics.densityDpi;
         mDisplayWidth = metrics.widthPixels/2;
         mDisplayHeight = metrics.heightPixels/2;
@@ -150,8 +177,6 @@ public class RecordService extends Service
 
         try
         {
-            // UI
-            recordingVideo = true;
             // Configure the MediaRecorder
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);

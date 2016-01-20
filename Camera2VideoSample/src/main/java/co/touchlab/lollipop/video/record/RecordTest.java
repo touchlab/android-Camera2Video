@@ -56,6 +56,7 @@ public class RecordTest extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_record_test);
 
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
@@ -112,7 +113,7 @@ public class RecordTest extends Activity
         startService(new Intent(this, RecordService.class));
 
         mService.initProjection(resultCode, data);
-        mService.startRecording(this);
+        mService.startRecording();
     }
 
     public void onToggleScreenShare()
@@ -131,7 +132,7 @@ public class RecordTest extends Activity
     {
         if (mService.isProjectionReady())
         {
-            mService.startRecording(this);
+            mService.startRecording();
         }
         else
         {
